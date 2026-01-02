@@ -1,48 +1,37 @@
 const Cart = require("../models/Cart");
 const Order = require("../models/Order");
 
-/**
- * @desc    Checkout and place order
- * @route   POST /api/checkout
- * @access  Private
- */
 const checkout = async (req, res) => {
   try {
-    // Get user cart
     const cart = await Cart.findOne({ user: req.user._id }).populate(
-      "items.product",
-      "name price"
+      "products.product"
     );
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart || cart.products.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Calculate total
-    let totalPrice = 0;
-    cart.items.forEach((item) => {
-      totalPrice += item.product.price * item.quantity;
+    let totalAmount = 0;
+
+    cart.products.forEach((item) => {
+      totalAmount += item.product.price * item.quantity;
     });
 
-    // Create order
-    const order = new Order({
+    const order = await Order.create({
       user: req.user._id,
-      items: cart.items,
-      totalPrice
+      products: cart.products,
+      totalAmount,
     });
 
-    await order.save();
-
-    // Clear cart
-    cart.items = [];
+    cart.products = [];
     await cart.save();
 
-    res.status(201).json({
+    res.json({
       message: "Order placed successfully",
-      order
+      order,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Checkout error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -1,10 +1,19 @@
 const Product = require("../models/Product");
 
-const addProduct = async (req, res) => {
+/**
+ * @desc    Create a new product
+ * @route   POST /api/products
+ * @access  Admin
+ */
+const createProduct = async (req, res) => {
   try {
     const { name, description, price, stock, category } = req.body;
 
-    // Create new product
+    // Validation
+    if (!name || price === undefined || stock === undefined || !category) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const product = await Product.create({
       name,
       description,
@@ -18,21 +27,25 @@ const addProduct = async (req, res) => {
       product
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
-const getAllProducts = async (req, res) => {
+
+/**
+ * @desc    Get all products (search & category filter)
+ * @route   GET /api/products
+ * @access  Public
+ */
+const getProducts = async (req, res) => {
   try {
     const { search, category } = req.query;
-
     let query = {};
 
-    // Search by name
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
 
-    // Filter by category
     if (category) {
       query.category = category;
     }
@@ -40,10 +53,16 @@ const getAllProducts = async (req, res) => {
     const products = await Product.find(query);
     res.json(products);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+/**
+ * @desc    Update product
+ * @route   PUT /api/products/:id
+ * @access  Admin
+ */
 const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -52,11 +71,13 @@ const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    product.name = req.body.name || product.name;
-    product.description = req.body.description || product.description;
-    product.price = req.body.price || product.price;
-    product.stock = req.body.stock || product.stock;
-    product.category = req.body.category || product.category;
+    const { name, description, price, stock, category } = req.body;
+
+    if (name !== undefined) product.name = name;
+    if (description !== undefined) product.description = description;
+    if (price !== undefined) product.price = price;
+    if (stock !== undefined) product.stock = stock;
+    if (category !== undefined) product.category = category;
 
     const updatedProduct = await product.save();
 
@@ -65,10 +86,16 @@ const updateProduct = async (req, res) => {
       product: updatedProduct
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+/**
+ * @desc    Delete product
+ * @route   DELETE /api/products/:id
+ * @access  Admin
+ */
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -81,6 +108,7 @@ const deleteProduct = async (req, res) => {
 
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -91,7 +119,3 @@ module.exports = {
   updateProduct,
   deleteProduct
 };
-
-
-
-

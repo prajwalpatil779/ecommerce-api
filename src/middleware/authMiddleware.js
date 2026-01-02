@@ -29,5 +29,5 @@ const protect = async (req, res, next) => {
   }
 };
 
-mmodule.exports = protect;
+module.exports = protect;
 

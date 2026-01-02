@@ -86,11 +86,12 @@ const deleteProduct = async (req, res) => {
 };
 
 module.exports = {
-  addProduct,
-  getAllProducts,
+  createProduct,
+  getProducts,
   updateProduct,
   deleteProduct
 };
+
 
 
 

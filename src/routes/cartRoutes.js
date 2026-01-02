@@ -1,22 +1,23 @@
 const express = require("express");
+const router = express.Router();
+
 const {
-  addToCart,
   getCart,
+  addToCart,
   removeFromCart,
   clearCart
 } = require("../controllers/cartController");
-const { protect } = require("../middleware/authMiddleware");
 
-const router = express.Router();
+const protect = require("../middleware/authMiddleware");
 
-// View cart
+// Get cart
 router.get("/", protect, getCart);
 
-// Add product to cart
+// Add to cart
 router.post("/add", protect, addToCart);
 
-// Remove product from cart
-router.delete("/remove/:productId", protect, removeFromCart);
+// Remove from cart
+router.delete("/remove/:id", protect, removeFromCart);
 
 // Clear cart
 router.delete("/clear", protect, clearCart);
